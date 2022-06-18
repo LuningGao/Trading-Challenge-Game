@@ -16,7 +16,7 @@ RULES = "1. You are in the crowd and you will trade against each other.\n" \
         "7. If you want to buy, you need to click on the amount you want to buy it for.\n" \
         "8. Same goes for selling.\n" \
         "9. You buy or sell the amount indicated in the Bid size/Ask size columns.\n" \
-        "10. Remember that you are a market maker, so you buy at ask price and sell at bid price.\n" \
+        "10. Remember that you are a market maker, so you(market maker) buy at the bid price and sell at the ask price.\n" \
         "11. You must also hedge your transaction for a price of $0.25 per contract\n" \
         "12. Your profit or loss will be indicated on the top. This profit/loss is considered after the transaction costs."
 
@@ -79,7 +79,12 @@ class GamePage(tk.Frame):
 
         quit_button = tk.Button(self.background, text="Quit", font=("Arial Bold", 15),
                                  command=lambda: controller.show_frame(HomePage))
-        quit_button.place(x=200, y=400)
+        quit_button.place(x=100, y=400)
+        
+        
+        clear_button = tk.Button(self.background, text="Clear", font=("Arial Bold", 15),
+                                 command=self.clear_switches)
+        clear_button.place(x=300, y=400)
 
         ########################################################################
         #-------------------------- Bid-Ask Table UI --------------------------#
@@ -236,8 +241,7 @@ class GamePage(tk.Frame):
                                                                       text=f"$ {self.bid_ask[row][column]}",
                                                                       font=("Arial", 15), onvalue=1, offvalue=0,
                                                                       variable=self.ask_3, command=self.toggle_other_boxes)
-                        self.bid_ask_table[row][column].place(x=self.anchorx + 160, y=self.anchory + 50
-                                                              )
+                        self.bid_ask_table[row][column].place(x=self.anchorx + 160, y=self.anchory + 50)
                     elif row == 4:
                         self.bid_ask[row][column] = self.bid_ask[1][2] + 1.5
                         self.bid_ask_table[row][column] = Checkbutton(self.background, bg="black", fg="white",
@@ -281,26 +285,26 @@ class GamePage(tk.Frame):
 
 
     def toggle_other_boxes(self):
-        if self.bid_2.get() == 1:
+        
+        if self.bid_1.get() == 1:
             self.bid_1.set(1)
+        elif self.bid_2.get() == 1:
+            self.bid_2.set(1)
         elif self.bid_3.get() == 1:
-            self.bid_1.set(1)
-            self.bid_2.set(1)
-        elif self.bid_4.get() == 1:
-            self.bid_1.set(1)
-            self.bid_2.set(1)
             self.bid_3.set(1)
-
-        if self.ask_2.get() == 1:
-            self.ask_1.set(1)
+        elif self.bid_4.get() == 1:
+            self.bid_4.set(1)
+        
+        
+        if self.ask_1.get() == 1:
+            self.ask_1.set(1)   
+        elif self.ask_2.get() == 1:
+            self.ask_2.set(1)
         elif self.ask_3.get() == 1:
-            self.ask_1.set(1)
-            self.ask_2.set(1)
-        elif self.ask_4.get() == 1:
-            self.ask_1.set(1)
-            self.ask_2.set(1)
             self.ask_3.set(1)
-
+        elif self.ask_4.get() == 1:
+            self.ask_4.set(1)
+            
 
     def show_popup(self):
         print_string = ""
@@ -310,10 +314,10 @@ class GamePage(tk.Frame):
                 expected_dice_value = self.dice_value
                 bid_price = self.bid_ask[i+1][1]
                 bid_amount = self.bid_ask[i+1][0]
-                net_pnl = (bid_price - expected_dice_value - 0.25)*bid_amount
-                print_string += f"Your order: Sell {bid_amount} at ${bid_price}, \n" \
+                net_pnl = (expected_dice_value - bid_price -0.25)*bid_amount
+                print_string += f"Your order: Buy {bid_amount} at ${bid_price}, \n" \
                                 f"Expected value of the dice = {expected_dice_value}, \n" \
-                                f"Net P/L = (${bid_price} - ${self.dice_value} - $0.25)*{bid_amount} = ${net_pnl}\n\n"
+                                f"Net P/L = (${self.dice_value} - ${bid_price} - $0.25)*{bid_amount} = ${net_pnl}\n\n"
                 self.pnl += net_pnl
 
             check_selected_ask = self.selected_asks[i].get()
@@ -321,10 +325,10 @@ class GamePage(tk.Frame):
                 expected_dice_value = self.dice_value
                 ask_price = self.bid_ask[i+1][2]
                 ask_amount = self.bid_ask[i+1][3]
-                net_pnl = (expected_dice_value - ask_price - 0.25)*ask_amount
-                print_string += f"Your order: Buy {ask_amount} at ${ask_price}, \n" \
+                net_pnl = (ask_price - expected_dice_value - 0.25)*ask_amount
+                print_string += f"Your order: Sell {ask_amount} at ${ask_price}, \n" \
                                 f"Expected value of the dice = {expected_dice_value}, \n" \
-                                f"Net P/L = (${self.dice_value} - ${ask_price} - $0.25)*{ask_amount} = ${net_pnl}\n\n"
+                                f"Net P/L = (${ask_price} - ${self.dice_value} - $0.25)*{ask_amount} = ${net_pnl}\n\n"
                 self.pnl += net_pnl
 
         popup = messagebox.showinfo(f"Your P/L calculations for round {self.round}", f"{print_string}")
